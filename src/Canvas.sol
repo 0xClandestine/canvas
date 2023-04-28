@@ -4,6 +4,14 @@ pragma solidity ^0.8.13;
 import {Base64} from "solady/utils/Base64.sol";
 import {LibString} from "solady/utils/LibString.sol";
 
+import {ERC721} from "solady/tokens/ERC721.sol";
+
+contract Canvas is ERC721 {
+
+    
+
+}
+
 function paint(bytes memory data) pure returns (string memory canvas) {
     unchecked {
         // Since the first byte of `data` is r count of colors, we can
@@ -14,9 +22,9 @@ function paint(bytes memory data) pure returns (string memory canvas) {
 
         // The total number of pixels in the painting can be computed by
         // subtracting the `endOfColors` index from the total length of
-        // `data`, and then dividing by 3, since each pixel is represented
-        // by 3 bytes (color index, x, y).
-        uint256 totalPixels = (data.length - endOfColors) / 4;
+        // `data`, and then dividing by 4, since each pixel is represented
+        // by 4 bytes (color index, repeating pixels, x, y).
+        uint256 totalPixels = (data.length - endOfColors) >> 2;
 
         for (uint256 i; i < totalPixels; ++i) {
             uint256 startOfPixel = endOfColors + i * 4;
@@ -30,7 +38,7 @@ function paint(bytes memory data) pure returns (string memory canvas) {
                 "<rect ",
                 pixelsToRepeat > 0
                     ? string.concat(
-                        'width="', LibString.toString(pixelsToRepeat * 10 + 10), 'px"'
+                        'style="width:', LibString.toString(pixelsToRepeat * 10 + 10), 'px;"'
                     )
                     : "",
                 ' x="',
@@ -53,7 +61,7 @@ function paint(bytes memory data) pure returns (string memory canvas) {
                 bytes(
                     string.concat(
                         '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">',
-                        "<style>rect {width: 100px; height: 10px;}</style>",
+                        "<style>rect {width: 10px; height: 10px;}</style>",
                         canvas,
                         "</svg>"
                     )
