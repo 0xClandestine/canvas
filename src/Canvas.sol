@@ -55,7 +55,7 @@ function paint(bytes memory data) pure returns (string memory canvas) {
     }
 }
 
-bytes16 HEX_SYMBOLS = "0123456789abcdef";
+bytes16 constant HEX_SYMBOLS = "0123456789abcdef";
 
 function toHexString(bytes1 r, bytes1 g, bytes1 b)
     pure
