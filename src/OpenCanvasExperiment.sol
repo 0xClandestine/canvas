@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {ERC721} from "solady/tokens/ERC721.sol";
 import {SSTORE2} from "solady/utils/SSTORE2.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {OpenCanvasLib} from "./OpenCanvasLib.sol";
 
 contract OpenCanvasExperiment is ERC721 {
@@ -59,7 +60,9 @@ contract OpenCanvasExperiment is ERC721 {
         return string.concat(
             "{" 
                 '"name":"Open Canvas Experiment",' 
-                '"description":"TBD",'
+                '"description":"Open Canvas Painting #',
+                LibString.toString(id),
+                '",'
                 '"image":"data:image/svg+xml;base64,',
                 OpenCanvasLib.paint(SSTORE2.read(paintings[id])),
             '"}'

@@ -16,7 +16,7 @@ contract CanvasTest is Test {
         canvas.paint(MARIO, address(this));
 
         assertEq(
-            0x31749da5e154113287a4d8abb25606e2bbb0b7b7212095c7cd78aa46d6fc8351,
+            0x7d39541fdcc2fddf096058ea70cdc04845f39762857c28b71b5ab984424c2638,
             keccak256(bytes(canvas.tokenURI(0)))
         );
         assertEq(canvas.totalSupply(), 1);
