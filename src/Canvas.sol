@@ -6,7 +6,7 @@ import {LibString} from "solady/utils/LibString.sol";
 
 function paint(bytes memory data) pure returns (string memory canvas) {
     unchecked {
-        // Since the first byte of `data` is a count of colors, we can
+        // Since the first byte of `data` is r count of colors, we can
         // compute the `endOfColors` index by taking the value of the
         // first byte multiplied by 3, then adding 1 to account for the
         // byte that stores the total amount of colors.
@@ -30,11 +30,11 @@ function paint(bytes memory data) pure returns (string memory canvas) {
                 '" y="',
                 LibString.toString(uint8(data[startOfPixel + 2]) * 10),
                 '" fill="#',
-                string.concat(
-                    LibString.toHexStringNoPrefix(uint256(uint8(data[startOfColor]))),
-                    LibString.toHexStringNoPrefix(uint256(uint8(data[startOfColor + 1]))),
-                    LibString.toHexStringNoPrefix(uint256(uint8(data[startOfColor + 2])))
-                ),
+                toHexString({
+                    r: data[startOfColor],
+                    g: data[startOfColor + 1],
+                    b: data[startOfColor + 2]
+                }),
                 '"/>'
             );
         }
@@ -53,4 +53,22 @@ function paint(bytes memory data) pure returns (string memory canvas) {
             )
         );
     }
+}
+
+bytes16 HEX_SYMBOLS = "0123456789abcdef";
+
+function toHexString(bytes1 r, bytes1 g, bytes1 b)
+    pure
+    returns (string memory)
+{
+    uint24 value = uint24(bytes3(bytes.concat(r, g, b)));
+
+    bytes memory buffer = new bytes(6);
+    buffer[5] = HEX_SYMBOLS[value & 0xF];
+    buffer[4] = HEX_SYMBOLS[(value >> 4) & 0xF];
+    buffer[3] = HEX_SYMBOLS[(value >> 8) & 0xF];
+    buffer[2] = HEX_SYMBOLS[(value >> 12) & 0xF];
+    buffer[1] = HEX_SYMBOLS[(value >> 16) & 0xF];
+    buffer[0] = HEX_SYMBOLS[(value >> 20) & 0xF];
+    return string(buffer);
 }
