@@ -1,24 +1,51 @@
-import numpy
 from PIL import Image
 
-def get_image():
-    """Get a numpy array of an image so that one can access values[x][y]."""
-    image = Image.open("test.png", "r").resize((10, 10)).convert('RGB')
-    width, height = image.size
-    pixel_values = list(image.getdata())
-    if image.mode == "RGB":
-        channels = 3
-    else:
+def unique_colors_index_for_pixel(rgb, unique_colors):
+    color_hex = "%02x%02x%02x" % tuple(rgb)
+    return unique_colors.index(color_hex)
+
+def codegen(image_path):
+    image = Image.open(image_path, "r").resize((10, 10)).convert("RGB")
+
+    if image.mode != "RGB":
         print("Unknown mode: %s" % image.mode)
         return None
-    hex_values = ['#%02x%02x%02x' % tuple(pixel_values[i]) for i in range(len(pixel_values))]
-    pixel_values = numpy.array(hex_values).reshape((width, height))
 
-    code = "string[] memory pixels = new string[](100);\n"
+    rgb = list(image.getdata())
 
-    for i in range(100):
-        code = code + f"pixels[{i}] = '{pixel_values[i // 10][i % 10]}';\n"
+    colors = ["%02x%02x%02x" % tuple(rgb[i]) for i in range(len(rgb))]
 
-    print(code)
+    unique_colors = list(set(colors))
 
-get_image()
+    if len(unique_colors) < 10:
+        output = format(len(unique_colors), "02x")
+    else:
+        output = format(len(unique_colors), "x")
+
+    for i in range(len(unique_colors)):
+        output += unique_colors[i]
+
+    index_list = []
+    x_cord_list = []
+    y_cord_list = []
+
+    for j in range(100):
+
+        x_cord = j % 10  # Sample x coordinate calculation
+        y_cord = j // 10  # Sample y coordinate calculation
+        index = unique_colors_index_for_pixel(rgb[j], unique_colors)
+
+        index_list.append(index)
+        x_cord_list.append(x_cord)
+        y_cord_list.append(y_cord)
+
+    for i in range(len(index_list)):
+        x_cord = format(x_cord_list[i], "02x")
+        y_cord = format(y_cord_list[i], "02x")
+        index = format(index_list[i], "02x")
+
+        output += index + x_cord + y_cord
+
+    return output
+
+print("0x" + codegen("test.png"))
