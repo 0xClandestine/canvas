@@ -16,19 +16,27 @@ function paint(bytes memory data) pure returns (string memory canvas) {
         // subtracting the `endOfColors` index from the total length of
         // `data`, and then dividing by 3, since each pixel is represented
         // by 3 bytes (color index, x, y).
-        uint256 totalPixels = (data.length - endOfColors) / 3;
+        uint256 totalPixels = (data.length - endOfColors) / 4;
 
         for (uint256 i; i < totalPixels; ++i) {
-            uint256 startOfPixel = endOfColors + i * 3;
+            uint256 startOfPixel = endOfColors + i * 4;
 
             uint256 startOfColor = uint8(data[startOfPixel]) * 3 + 1;
 
+            uint256 pixelsToRepeat = uint8(data[startOfPixel + 1]);
+
             canvas = string.concat(
                 canvas,
-                '<rect x="',
-                LibString.toString(uint8(data[startOfPixel + 1]) * 10),
-                '" y="',
+                "<rect ",
+                pixelsToRepeat > 0
+                    ? string.concat(
+                        'width="', LibString.toString(pixelsToRepeat * 10 + 10), 'px"'
+                    )
+                    : "",
+                ' x="',
                 LibString.toString(uint8(data[startOfPixel + 2]) * 10),
+                '" y="',
+                LibString.toString(uint8(data[startOfPixel + 3]) * 10),
                 '" fill="#',
                 toHexString({
                     r: data[startOfColor],
@@ -45,7 +53,7 @@ function paint(bytes memory data) pure returns (string memory canvas) {
                 bytes(
                     string.concat(
                         '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">',
-                        "<style>rect {width: 10px; height: 10px;}</style>",
+                        "<style>rect {width: 100px; height: 10px;}</style>",
                         canvas,
                         "</svg>"
                     )
