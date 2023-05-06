@@ -63,7 +63,7 @@ contract OpenCanvasExperiment is ERC721 {
                 '"description":"Open Canvas Painting #',
                 LibString.toString(id),
                 '",'
-                '"image":"data:image/svg+xml;base64,',
+                '"image":"',
                 OpenCanvasLib.paint(SSTORE2.read(paintings[id])),
             '"}'
         );
