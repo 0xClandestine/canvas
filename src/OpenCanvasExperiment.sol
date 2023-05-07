@@ -17,20 +17,30 @@ contract OpenCanvasExperiment is ERC721 {
     /// Mutable Storage
     /// -----------------------------------------------------------------------
 
-    address[] public paintings;
+    struct Painting {
+        address pointer;
+        uint96 inflatedLength;
+    }
+
+    Painting[] public paintings;
 
     /// -----------------------------------------------------------------------
     /// Mint Logic
     /// -----------------------------------------------------------------------
 
-    function paint(bytes memory painting, address to)
+    function paint(bytes memory painting, uint256 inflatedLength, address to)
         external
         virtual
         returns (uint256 id)
     {
         _mint(to, id = paintings.length);
 
-        paintings.push(SSTORE2.write(painting));
+        paintings.push(
+            Painting({
+                pointer: SSTORE2.write(painting),
+                inflatedLength: uint96(inflatedLength)
+            })
+        );
 
         emit PaintingIssued(msg.sender, painting);
     }
@@ -50,21 +60,14 @@ contract OpenCanvasExperiment is ERC721 {
     }
 
     /// @dev Returns the Uniform Resource Identifier (URI) for token `id`.
-    function tokenURI(uint256 id)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 id) public view virtual override returns (string memory) {
+        Painting memory painting = paintings[id];
+
         return string.concat(
-            "{" 
-                '"name":"Open Canvas Experiment",' 
-                '"description":"Open Canvas Painting #',
-                LibString.toString(id),
-                '",'
-                '"image":"',
-                OpenCanvasLib.paint(SSTORE2.read(paintings[id])),
+            "{" '"name":"Open Canvas Experiment",' '"description":"Open Canvas Painting #',
+            LibString.toString(id),
+            '",' '"image":"',
+            OpenCanvasLib.paint(SSTORE2.read(painting.pointer), painting.inflatedLength),
             '"}'
         );
     }

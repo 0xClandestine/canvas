@@ -4,35 +4,31 @@ pragma solidity ^0.8.13;
 import {Base64} from "solady/utils/Base64.sol";
 import {LibString} from "solady/utils/LibString.sol";
 
+import {LibRLE} from "./LibRLE.sol";
+import {LibInflate} from "./LibInflate.sol";
+
 library OpenCanvasLib {
-    function paint(bytes memory data)
+    function paint(bytes memory deflated, uint256 inflatedLength)
         internal
         pure
         returns (string memory canvas)
     {
         unchecked {
-            uint256 endOfColors = uint8(data[0]) * 3 + 1;
-            uint256 totalPixels = (data.length - endOfColors) >> 2;
+            (, bytes memory data) = LibInflate.puff(deflated, inflatedLength);
 
-            for (uint256 i; i < totalPixels; ++i) {
-                uint256 startOfPixel = endOfColors + i * 4;
-                uint256 startOfColor = uint8(data[startOfPixel]) * 3 + 1;
-                uint256 pixelsToRepeat = uint8(data[++startOfPixel]);
+            data = LibRLE.decode(data);
+
+            uint256 endOfColors = uint8(data[0]) * 3 + 1;
+
+            for (uint256 i; i < 100; ++i) {
+                uint256 startOfColor = uint8(data[endOfColors + i]) * 3 + 1;
 
                 canvas = string.concat(
                     canvas,
-                    "<rect ",
-                    pixelsToRepeat > 0
-                        ? string.concat(
-                            'style="width:',
-                            LibString.toString(pixelsToRepeat * 10 + 10),
-                            'px;"'
-                        )
-                        : "",
-                    ' x="',
-                    LibString.toString(uint8(data[++startOfPixel]) * 10),
+                    '<rect x="',
+                    LibString.toString(i % 10 * 10),
                     '" y="',
-                    LibString.toString(uint8(data[++startOfPixel]) * 10),
+                    LibString.toString(i / 10 * 10),
                     '" fill="#',
                     toHexString({
                         r: data[startOfColor],
